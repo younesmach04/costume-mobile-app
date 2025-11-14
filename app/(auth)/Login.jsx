@@ -1,25 +1,69 @@
-import {StyleSheet, TextInput, useColorScheme, View, ImageBackground, Button, Pressable , Text} from 'react-native'
-import React from 'react'
-import {colors} from "../../Constants/Colors";
+import {
+    StyleSheet,
+    TextInput,
+    useColorScheme,
+    View,
+    ImageBackground,
+    Pressable,
+    Text,
+    Alert
+} from 'react-native'
+import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { colors } from "../../Constants/Colors";
 import Spacer from "../../components/Spacer";
-import ThemedView from "../../components/ThemedView";
-import Themedtext from "../../components/Themedtext";
 import ThemedText from "../../components/Themedtext";
-import Signup from "./Signup";
-import {Link} from "expo-router";
+import { Link, useRouter } from "expo-router";
+import authService from "../../Services/authService";
 
 const Login = () => {
     const colorScheme = useColorScheme()
     const theme = colors[colorScheme]
+    const router = useRouter()
+    const [user, setUser] = useState({
+        email: '',
+        password: ''
+    });
+    const [loading, setLoading] = useState(false);
+
+    const handleInputChange = (key, value) => {
+        setUser(prev => {
+            return { ...prev, [key]: value }
+        })
+    }
+
+    const handleLogin = async () => {
+        if (!user.email || !user.password) {
+            Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await authService.login({
+                email: user.email,
+                password: user.password
+            });
+             console.log(response)
+            console.log('Succès', 'Connexion réussie');
+
+        } catch (error) {
+            console.log('Erreur', error.message || 'Erreur de connexion');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <ImageBackground
-            source={require('../../assets/background.png')} // Change to your image path
+            source={require('../../assets/background.png')}
             style={styles.background}
             resizeMode="cover"
         >
             <View style={styles.container}>
                 <View style={styles.formContainer}>
-                    <Themedtext type='title'>Sign in </Themedtext>
+                    {/* Correction : ThemedText au lieu de Themedtext */}
+                    <ThemedText type='title'>Sign in</ThemedText>
 
                     <Spacer height={20}/>
 
@@ -27,6 +71,11 @@ const Login = () => {
                         style={styles.input}
                         placeholder="Email"
                         placeholderTextColor="#999"
+                        value={user.email}
+                        onChangeText={(text) => handleInputChange('email', text)}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        editable={!loading}
                     />
 
                     <Spacer height={15}/>
@@ -36,8 +85,13 @@ const Login = () => {
                         placeholder="Password"
                         placeholderTextColor="#999"
                         secureTextEntry
+                        value={user.password}
+                        onChangeText={(text) => handleInputChange('password', text)}
+                        editable={!loading}
                     />
+
                     <Spacer height={20}/>
+
                     <View style={styles.signupContainer}>
                         <ThemedText type="util" style={{color: "#880808"}}>
                             You don't have an account ? Signup
@@ -50,19 +104,24 @@ const Login = () => {
                             </Pressable>
                         </Link>
                     </View>
+
                     <Spacer height={20}/>
-                    <View >
+
+                    <View>
                         <Pressable
-                            style={styles.button}
+                            style={[
+                                styles.button,
+                                loading && styles.buttonDisabled
+                            ]}
+                            onPress={handleLogin}
+                            disabled={loading}
                         >
-                            <Themedtext  >Login</Themedtext>
+                            {/* Correction : ThemedText au lieu de Themedtext */}
+                            <ThemedText style={styles.buttonText}>
+                                {loading ? 'Connexion...' : 'Login'}
+                            </ThemedText>
                         </Pressable>
-
-
-
                     </View>
-
-
                 </View>
             </View>
         </ImageBackground>
@@ -80,14 +139,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 16,
-        marginTop:80
+        marginTop: 80
     },
-
     formContainer: {
-
         width: '100%',
         maxWidth: 400,
-        backgroundColor: 'rgba(255, 255, 255, 0.0)', // Semi-transparent background
+        backgroundColor: 'rgba(255, 255, 255, 0.0)',
         padding: 20,
         borderRadius: 12,
     },
@@ -99,17 +156,26 @@ const styles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: 'white',
     },
-    button:{
+    button: {
         backgroundColor: '#007AFF',
-        width:80,
-        padding: 7,
+        padding: 15,
         borderRadius: 8,
         alignItems: 'center',
+        width: '100%',
+    },
+    buttonDisabled: {
+        backgroundColor: '#cccccc',
+        opacity: 0.6,
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
     signupContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         flexWrap: 'wrap',
+        justifyContent: 'center',
     }
-
 })
