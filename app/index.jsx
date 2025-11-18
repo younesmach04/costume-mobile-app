@@ -20,6 +20,13 @@ const index = () => {
                     <Text style={styles.buttonText}>Go to main Screen</Text>
                 </TouchableOpacity>
             </Link>
+            <Spacer height={200}></Spacer>
+            <Link href="/test/car" asChild>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Go to main Screen</Text>
+                </TouchableOpacity>
+            </Link>
+
 
         </SafeAreaView>
     )

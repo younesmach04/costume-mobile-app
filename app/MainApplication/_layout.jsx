@@ -27,14 +27,13 @@ export default function MainApplicationLayout() {
                     paddingBottom: 10,
                     paddingLeft: 40,
                     paddingRight: 40,
-                    marginHorizontal:50,
+                    marginHorizontal: 50,
                 },
                 tabBarActiveTintColor: "#151235",
                 tabBarInactiveTintColor: theme.inactiveColor || '#666666',
                 headerShown: false,
                 animation: "fade"
             }}
-
         >
             <Tabs.Screen
                 name="Main"
@@ -53,22 +52,20 @@ export default function MainApplicationLayout() {
                 name="Create"
                 options={{
                     title: "Create",
-
                     tabBarIcon: ({ focused, color, size }) => (
                         <Ionicons
-                            name={focused ? "add" : "add"}
-                            size={32} // Bigger icon
+                            name="add"
+                            size={32}
                             color="#ffffff"
                         />
                     ),
                     tabBarItemStyle: {
-                        width: 70, // Big circular button
+                        width: 70,
                         height: 70,
-                        borderRadius: 35, // Half of width/height for perfect circle
-                        backgroundColor: "#335333", // Green background
-                        marginTop: -25, // Float above the tab bar
+                        borderRadius: 35,
+                        backgroundColor: "#335333",
+                        marginTop: -25,
                         marginHorizontal: 10,
-
                         shadowColor: '#2c952c',
                         shadowOffset: { width: 0, height: 4 },
                         shadowOpacity: 0.3,
@@ -90,6 +87,50 @@ export default function MainApplicationLayout() {
                             color={color}
                         />
                     ),
+                }}
+            />
+
+            {/* Manually hidden screens */}
+            <Tabs.Screen
+                name="MyProfiles"
+                options={{
+                    tabBarItemStyle: { display: "none" }
+                }}
+            />
+            <Tabs.Screen
+                name="Profiles/Gilet_profile"
+                options={{
+                    tabBarItemStyle: { display: "none" }
+                }}
+            />
+            <Tabs.Screen
+                name="Profiles/Pantalon_profile"
+                options={{
+                    tabBarItemStyle: { display: "none" }
+                }}
+            />
+            <Tabs.Screen
+                name="Profiles/Veste_profile"
+                options={{
+                    tabBarItemStyle: { display: "none" }
+                }}
+            />
+            <Tabs.Screen
+                name="Profiles/Create/CreateGilet"
+                options={{
+                    tabBarItemStyle: { display: "none" }
+                }}
+            />
+            <Tabs.Screen
+                name="Profiles/Create/CreatePantalon"
+                options={{
+                    tabBarItemStyle: { display: "none" }
+                }}
+            />
+            <Tabs.Screen
+                name="Profiles/Create/CreateVeste"
+                options={{
+                    tabBarItemStyle: { display: "none" }
                 }}
             />
         </Tabs>
