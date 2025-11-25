@@ -1,4 +1,6 @@
 import { apiService, tokenService } from './api';
+import {decodeJWT} from "../utils/helpers";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export const authService = {
     async register(userData) {
         try {
@@ -17,6 +19,9 @@ export const authService = {
             console.log(' Connexion réussie:', result.message);
             if (result.data && result.data.access_token) {
                 await tokenService.setToken(result.data.access_token);
+                const decodedToken = decodeJWT(result.data.access_token)
+                const {email,firstName,lastName,sub,role} = decodedToken
+                await this.setUser({email,firstName,lastName,id:sub,role})
             }
 
             return result;
@@ -115,7 +120,37 @@ export const authService = {
 
     async getCurrentToken() {
         return await tokenService.getToken();
-    }
+    },
+    async getCurrentUser(){
+      const user = await AsyncStorage.getItem('user')
+      return user ? JSON.parse(user) : null
+    },
+
+    async getCurrentUserId(){
+        const user = await AsyncStorage.getItem('user')
+        return user ? JSON.parse(user).id : 0
+    },
+
+
+    async setUser(user){
+        try {
+            await AsyncStorage.setItem('user', JSON.stringify(user));
+            console.log(' Utilisateur stocké avec succès');
+        } catch (error) {
+            console.error('Erreur d\'enregistrement de l\'utilisateur:', error);
+            throw error;
+        }
+    },
+    async removeUser() {
+        try {
+            await AsyncStorage.removeItem('user');
+            console.log('🔐 Utilisateur supprimé avec succès');
+        } catch (error) {
+            console.error('Erreur de suppression de l\'utilisateur:', error);
+            throw error;
+        }
+    },
+
 };
 
 export default authService;

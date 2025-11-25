@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -6,20 +6,31 @@ import {
     ScrollView,
     TouchableOpacity,
     StyleSheet,
+    Alert,
 } from 'react-native';
-import Spacer from "../../../../components/Spacer";
+import GiletService from "../../../../Services/GiletService";
+import { router } from "expo-router";
+import authService from "../../../../Services/authService";
 
 export default function GiletProfileForm() {
     const [profile, setProfile] = useState({
-        profileName: 'Profil Principal',
-        tourPoitrine: '',
-        tourTaille: '',
-        longueurGilet: '',
-        encolure: '',
-        encolureStyle: 'v',
-        boutons: '6',
-        poches: 'droites'
+        user_id: 0,
+        profile_name: 'Profil Gilet',
+        tour_poitrine: '',
+        tour_taille: '',
+        largeur_epaules: '',
+        longueur_gilet: '',
+        boutons: '5',
+        poches: 'classique'
     });
+
+    useEffect(() => {
+        const getCurrentUserId = async () => {
+            const userId = await authService.getCurrentUserId();
+            setProfile(prev => ({ ...prev, user_id: userId }));
+        }
+        getCurrentUserId();
+    }, []);
 
     const handleInputChange = (field, value) => {
         setProfile(prev => ({
@@ -28,49 +39,45 @@ export default function GiletProfileForm() {
         }));
     };
 
-    const handleSubmit = () => {
-        console.log('Profile Data:', profile);
-        alert('Profil enregistré !');
+    const handleSubmit = async () => {
+        try {
+            const validatedData = GiletService.validateProfileData(profile);
+            const result = await GiletService.createProfile(validatedData);
+            Alert.alert("Succès", "Profil de gilet enregistré !");
+            router.back();
+        } catch (error) {
+            Alert.alert("Erreur", error.message || "Impossible de créer le profil");
+        }
     };
 
     const handleReset = () => {
         setProfile({
-            profileName: 'Profil Principal',
+            profileName: 'Profil Gilet',
             tourPoitrine: '',
             tourTaille: '',
+            largeurEpaules: '',
             longueurGilet: '',
-            encolure: '',
-            encolureStyle: 'v',
-            boutons: '6',
-            poches: 'droites'
+            typeBoutons: '5',
+            poches: 'classique'
         });
     };
 
     return (
-        <>
-
         <View style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Profil de Gilet</Text>
-                <Text style={styles.headerSubtitle}>Configurez vos mesures et préférences</Text>
+                <Text style={styles.headerSubtitle}>Renseignez vos mesures</Text>
             </View>
-
-            {/* Scrollable Form */}
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-                {/* Nom du profil */}
                 <View style={styles.section}>
                     <Text style={styles.label}>Nom du Profil</Text>
                     <TextInput
                         style={styles.input}
                         value={profile.profileName}
-                        onChangeText={(value) => handleInputChange('profileName', value)}
-                        maxLength={100}
+                        onChangeText={(v) => handleInputChange('profileName', v)}
                         placeholder="Nom du profil"
                     />
                 </View>
-
-                {/* Mesures Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Mesures (cm)</Text>
 
@@ -78,121 +85,83 @@ export default function GiletProfileForm() {
                     <TextInput
                         style={styles.input}
                         value={profile.tourPoitrine}
-                        onChangeText={(value) => handleInputChange('tourPoitrine', value)}
+                        onChangeText={(v) => handleInputChange('tourPoitrine', v)}
                         keyboardType="decimal-pad"
-                        placeholder="ex: 98.50"
+                        placeholder="ex: 98"
                     />
 
                     <Text style={styles.label}>Tour de Taille</Text>
                     <TextInput
                         style={styles.input}
                         value={profile.tourTaille}
-                        onChangeText={(value) => handleInputChange('tourTaille', value)}
+                        onChangeText={(v) => handleInputChange('tourTaille', v)}
                         keyboardType="decimal-pad"
-                        placeholder="ex: 85.00"
+                        placeholder="ex: 85"
                     />
 
-                    <Text style={styles.label}>Longueur Gilet</Text>
+                    <Text style={styles.label}>Largeur d'Épaules</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={profile.largeurEpaules}
+                        onChangeText={(v) => handleInputChange('largeurEpaules', v)}
+                        keyboardType="decimal-pad"
+                        placeholder="ex: 45"
+                    />
+
+                    <Text style={styles.label}>Longueur du Gilet</Text>
                     <TextInput
                         style={styles.input}
                         value={profile.longueurGilet}
-                        onChangeText={(value) => handleInputChange('longueurGilet', value)}
+                        onChangeText={(v) => handleInputChange('longueurGilet', v)}
                         keyboardType="decimal-pad"
-                        placeholder="ex: 60.00"
-                    />
-
-                    <Text style={styles.label}>Encolure</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={profile.encolure}
-                        onChangeText={(value) => handleInputChange('encolure', value)}
-                        keyboardType="decimal-pad"
-                        placeholder="ex: 40.00"
+                        placeholder="ex: 60"
                     />
                 </View>
-
-                {/* Style Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Style</Text>
-
-                    <Text style={styles.label}>Style d'Encolure</Text>
-                    <View style={styles.buttonGroup}>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.encolureStyle === 'v' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('encolureStyle', 'v')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.encolureStyle === 'v' && styles.optionButtonTextActive]}>
-                                V
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.encolureStyle === 'u' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('encolureStyle', 'u')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.encolureStyle === 'u' && styles.optionButtonTextActive]}>
-                                U
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.encolureStyle === 'carree' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('encolureStyle', 'carree')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.encolureStyle === 'carree' && styles.optionButtonTextActive]}>
-                                Carrée
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
                     <Text style={styles.label}>Nombre de Boutons</Text>
                     <View style={styles.buttonGroup}>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.boutons === '5' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('boutons', '5')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.boutons === '5' && styles.optionButtonTextActive]}>
-                                5 Boutons
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.boutons === '6' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('boutons', '6')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.boutons === '6' && styles.optionButtonTextActive]}>
-                                6 Boutons
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.boutons === '7' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('boutons', '7')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.boutons === '7' && styles.optionButtonTextActive]}>
-                                7 Boutons
-                            </Text>
-                        </TouchableOpacity>
+                        {[4, 5, 6].map(b => (
+                            <TouchableOpacity
+                                key={b}
+                                style={[
+                                    styles.optionButton,
+                                    profile.typeBoutons === b && styles.optionButtonActive
+                                ]}
+                                onPress={() => handleInputChange('typeBoutons', b)}
+                            >
+                                <Text style={[
+                                    styles.optionButtonText,
+                                    profile.typeBoutons === b && styles.optionButtonTextActive
+                                ]}>
+                                    {b} Boutons
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
-
                     <Text style={styles.label}>Type de Poches</Text>
                     <View style={styles.buttonGroup}>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.poches === 'droites' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('poches', 'droites')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.poches === 'droites' && styles.optionButtonTextActive]}>
-                                Droites
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.poches === 'inclinees' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('poches', 'inclinees')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.poches === 'inclinees' && styles.optionButtonTextActive]}>
-                                Inclinées
-                            </Text>
-                        </TouchableOpacity>
+                        {['classique', 'passepoil', 'double'].map(p => (
+                            <TouchableOpacity
+                                key={p}
+                                style={[
+                                    styles.optionButton,
+                                    profile.poches === p && styles.optionButtonActive
+                                ]}
+                                onPress={() => handleInputChange('poches', p)}
+                            >
+                                <Text style={[
+                                    styles.optionButtonText,
+                                    profile.poches === p && styles.optionButtonTextActive
+                                ]}>
+                                    {p}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
                 </View>
 
-                {/* Action Buttons */}
+                {/* Boutons */}
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                         <Text style={styles.submitButtonText}>Enregistrer le Profil</Text>
@@ -203,18 +172,16 @@ export default function GiletProfileForm() {
                     </TouchableOpacity>
                 </View>
 
-                {/* Debug View */}
+                {/* Debug */}
                 <View style={styles.debugContainer}>
-                    <Text style={styles.debugTitle}>Valeurs actuelles:</Text>
+                    <Text style={styles.debugTitle}>Valeurs actuelles :</Text>
                     <Text style={styles.debugText}>{JSON.stringify(profile, null, 2)}</Text>
                 </View>
+
             </ScrollView>
-            <Spacer height={150}/>
         </View>
-        </>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -265,8 +232,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         color: '#475569',
-        marginBottom: 8,
         marginTop: 12,
+        marginBottom: 8,
     },
     input: {
         backgroundColor: '#f8fafc',

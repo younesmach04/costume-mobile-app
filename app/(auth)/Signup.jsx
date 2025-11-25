@@ -84,16 +84,7 @@ const Signup = () => {
 
         setLoading(true)
         try {
-            const userData = {
-                first_name: user.firstName,
-                last_name: user.lastName,
-                email: user.email,
-                password: user.password,
-                password_confirmation: user.confirmPassword,
-                phone: user.phone
-            }
-
-            const response = await authService.register(userData)
+            const response = await authService.register(user)
 
             Alert.alert('Succès', 'Compte créé avec succès! Vous pouvez maintenant vous connecter.', [
                 {
