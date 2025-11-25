@@ -5,11 +5,9 @@ import {
     View,
     ImageBackground,
     Pressable,
-    Text,
     Alert
 } from 'react-native'
 import React, { useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from "../../Constants/Colors";
 import Spacer from "../../components/Spacer";
 import ThemedText from "../../components/Themedtext";
@@ -40,12 +38,12 @@ const Login = () => {
 
         setLoading(true);
         try {
-            const response = await authService.login({
+            await authService.login({
                 email: user.email,
                 password: user.password
             });
-             console.log(response)
-            console.log('Succès', 'Connexion réussie');
+
+            router.push("/MainApplication/Main");
 
         } catch (error) {
             console.log('Erreur', error.message || 'Erreur de connexion');
@@ -62,7 +60,6 @@ const Login = () => {
         >
             <View style={styles.container}>
                 <View style={styles.formContainer}>
-                    {/* Correction : ThemedText au lieu de Themedtext */}
                     <ThemedText type='title'>Sign in</ThemedText>
 
                     <Spacer height={20}/>

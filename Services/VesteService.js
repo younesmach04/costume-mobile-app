@@ -1,6 +1,6 @@
 import {apiService} from './api';
 
-export const giletService = {
+export const vesteService = {
     async createProfile(profileData) {
         return apiService.post('/veste-profiles/', profileData, true);
     },
@@ -26,30 +26,38 @@ export const giletService = {
     },
     validateProfileData(profileData) {
         return {
+            user_id: profileData.user_id,
             profile_name: profileData.profileName || 'Profil Principal',
             tour_poitrine: parseFloat(profileData.tourPoitrine) || null,
             tour_taille: parseFloat(profileData.tourTaille) || null,
-            longueur_gilet: parseFloat(profileData.longueurGilet) || null,
-            encolure: parseFloat(profileData.encolure) || null,
-            encolure_style: profileData.encolureStyle || 'v',
-            boutons: parseInt(profileData.boutons) || 6,
-            poches: profileData.poches || 'droites',
+            tour_hanches: parseFloat(profileData.tourHanches) || null,
+            largeur_epaules: parseFloat(profileData.largeurEpaules) || null,
+            longueur_manche: parseFloat(profileData.longueurManche) || null,
+            longueur_veste: parseFloat(profileData.longueurVeste) || null,
+            type_revers: profileData.typeRevers || 'notch',
+            boutons: parseInt(profileData.boutons) || 2,
+            poches: profileData.poches || 'flap',
+            ventriere: profileData.ventriere || 'cote'
         };
     },
-
     formatProfileForDisplay(backendData) {
         return {
             id: backendData.id,
             profileName: backendData.profile_name,
+
             tourPoitrine: backendData.tour_poitrine?.toString() || '',
             tourTaille: backendData.tour_taille?.toString() || '',
-            longueurGilet: backendData.longueur_gilet?.toString() || '',
-            encolure: backendData.encolure?.toString() || '',
-            encolureStyle: backendData.encolure_style || 'v',
-            boutons: backendData.boutons?.toString() || '6',
-            poches: backendData.poches || 'droites',
+            tourHanches: backendData.tour_hanches?.toString() || '',
+            largeurEpaules: backendData.largeur_epaules?.toString() || '',
+            longueurManche: backendData.longueur_manche?.toString() || '',
+            longueurVeste: backendData.longueur_veste?.toString() || '',
+
+            typeRevers: backendData.type_revers,
+            boutons: backendData.boutons?.toString() || '2',
+            poches: backendData.poches || 'flap',
+            ventriere: backendData.ventriere || 'cote'
         };
-    },
+    }
 };
 
-export default giletService;
+export default vesteService;

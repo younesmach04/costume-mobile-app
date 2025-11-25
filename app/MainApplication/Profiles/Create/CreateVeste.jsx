@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     View,
     Text,
     TextInput,
     ScrollView,
     TouchableOpacity,
-    StyleSheet,
+    StyleSheet, Alert,
 } from 'react-native';
+import VesteService from "../../../../Services/VesteService";
+import {router} from "expo-router";
+import authService from "../../../../Services/authService";
 
 export default function VesteProfileForm() {
     const [profile, setProfile] = useState({
+        user_id : 0,
         profileName: 'Profil Principal',
         tourPoitrine: '',
         tourTaille: '',
@@ -23,6 +27,14 @@ export default function VesteProfileForm() {
         ventriere: 'cote'
     });
 
+    useEffect(()=>{
+     const getCurrentUserId = async () => {
+        const userId = await authService.getCurrentUserId();
+        setProfile(prev => ({...prev,user_id: userId}))
+     }
+     getCurrentUserId();
+    },[])
+
     const handleInputChange = (field, value) => {
         setProfile(prev => ({
             ...prev,
@@ -30,9 +42,15 @@ export default function VesteProfileForm() {
         }));
     };
 
-    const handleSubmit = () => {
-        console.log('Profile Data:', profile);
-        alert('Profil enregistré !');
+    const handleSubmit = async () => {
+        try {
+            const validatedData = VesteService.validateProfileData(profile);
+            const result = await VesteService.createProfile(validatedData);
+            Alert.alert('Succès', 'Profil enregistré avec succès!');
+            router.back();
+        } catch (error) {
+            Alert.alert('Erreur', error.message || 'Impossible de créer le profil');
+        }
     };
 
     const handleReset = () => {
@@ -248,8 +266,6 @@ export default function VesteProfileForm() {
                         </TouchableOpacity>
                     </View>
                 </View>
-
-                {/* Action Buttons */}
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
                         <Text style={styles.submitButtonText}>Enregistrer le Profil</Text>
@@ -259,8 +275,6 @@ export default function VesteProfileForm() {
                         <Text style={styles.resetButtonText}>Réinitialiser</Text>
                     </TouchableOpacity>
                 </View>
-
-                {/* Debug View */}
                 <View style={styles.debugContainer}>
                     <Text style={styles.debugTitle}>Valeurs actuelles:</Text>
                     <Text style={styles.debugText}>{JSON.stringify(profile, null, 2)}</Text>

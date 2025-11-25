@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const API_BASE_URL = 'http://192.168.11.151:8000/api';
+const API_BASE_URL = 'http://192.168.11.194:8000/api';
 const handleResponse = async (response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({
@@ -169,7 +169,8 @@ export const tokenService = {
             console.error('Erreur de vérification d\'authentification:', error);
             return false;
         }
-    }
+    },
+
 };
 
 export default apiService;
