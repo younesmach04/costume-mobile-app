@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -9,22 +9,34 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
+import pantalonService from "../../../../Services/PantalonService";
+import { router } from "expo-router";
+import authService from "../../../../Services/authService";
 
 export default function PantalonProfileForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [profile, setProfile] = useState({
-        profileName: 'Profil Principal',
-        tourTaille: '',
-        tourHanches: '',
-        tourCuisse: '',
-        tourGenou: '',
-        tourCheville: '',
-        longueurEntrejambes: '',
-        longueurTotale: '',
+        user_id: 0,
+        profile_name: 'Profil Pantalon',
+        tour_taille: '',
+        tour_hanches: '',
+        tour_cuisse: '',
+        tour_genou: '',
+        tour_cheville: '',
+        longueur_entrejambes: '',
+        longueur_totale: '',
         coupe: 'regular',
         revers: 'non',
-        typeCeinture: 'classique'
+        type_ceinture: 'classique'
     });
+
+    useEffect(() => {
+        const getCurrentUserId = async () => {
+            const userId = await authService.getCurrentUserId();
+            setProfile(prev => ({ ...prev, user_id: userId }));
+        };
+        getCurrentUserId();
+    }, []);
 
     const handleInputChange = (field, value) => {
         setProfile(prev => ({
@@ -34,8 +46,7 @@ export default function PantalonProfileForm() {
     };
 
     const handleSubmit = async () => {
-        // Validation
-        if (!profile.tourTaille || !profile.tourHanches) {
+        if (!profile.tour_taille || !profile.tour_hanches) {
             Alert.alert('Erreur', 'Tour de taille et hanches sont requis');
             return;
         }
@@ -43,94 +54,61 @@ export default function PantalonProfileForm() {
         setIsLoading(true);
 
         try {
-            // Convert to snake_case for API
-            const apiData = {
-                profile_name: profile.profileName,
-                tour_taille: profile.tourTaille,
-                tour_hanches: profile.tourHanches,
-                tour_cuisse: profile.tourCuisse,
-                tour_genou: profile.tourGenou,
-                tour_cheville: profile.tourCheville,
-                longueur_entrejambes: profile.longueurEntrejambes,
-                longueur_totale: profile.longueurTotale,
-                coupe: profile.coupe,
-                revers: profile.revers,
-                type_ceinture: profile.typeCeinture
-            };
-
-            console.log('Profile Data:', apiData);
-
-            const response = await fetch('http://your-laravel-app.com/api/pantalon-profiles', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(apiData),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                Alert.alert('Succès', 'Profil enregistré !');
-                // Optionally reset form after successful save
-            } else {
-                Alert.alert('Erreur', data.message || 'Erreur de sauvegarde');
-            }
+            const validatedData = pantalonService.validateProfileData(profile);
+            const result = await pantalonService.createProfile(validatedData);
+            Alert.alert("Succès", "Profil de pantalon enregistré !");
+            router.back();
         } catch (error) {
-            Alert.alert('Erreur', 'Problème de connexion');
-            console.error('Submit error:', error);
+            console.error('Erreur lors de la sauvegarde:', error);
+            Alert.alert("Erreur", error.message || "Impossible de créer le profil");
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleReset = () => {
-        setProfile({
-            profileName: 'Profil Principal',
-            tourTaille: '',
-            tourHanches: '',
-            tourCuisse: '',
-            tourGenou: '',
-            tourCheville: '',
-            longueurEntrejambes: '',
-            longueurTotale: '',
+        setProfile(prev => ({
+            ...prev,
+            profile_name: 'Profil Pantalon',
+            tour_taille: '',
+            tour_hanches: '',
+            tour_cuisse: '',
+            tour_genou: '',
+            tour_cheville: '',
+            longueur_entrejambes: '',
+            longueur_totale: '',
             coupe: 'regular',
             revers: 'non',
-            typeCeinture: 'classique'
-        });
+            type_ceinture: 'classique'
+        }));
     };
 
     return (
         <View style={styles.container}>
-            {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Profil de Pantalon</Text>
                 <Text style={styles.headerSubtitle}>Configurez vos mesures et préférences</Text>
             </View>
-
-            {/* Scrollable Form */}
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
                 {/* Nom du profil */}
                 <View style={styles.section}>
                     <Text style={styles.label}>Nom du Profil</Text>
                     <TextInput
                         style={styles.input}
-                        value={profile.profileName}
-                        onChangeText={(value) => handleInputChange('profileName', value)}
+                        value={profile.profile_name}
+                        onChangeText={(value) => handleInputChange('profile_name', value)}
                         maxLength={100}
                         placeholder="Nom du profil"
                     />
                 </View>
-
-                {/* Mesures Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Mesures (cm)</Text>
 
                     <Text style={styles.label}>Tour de Taille *</Text>
                     <TextInput
                         style={styles.input}
-                        value={profile.tourTaille}
-                        onChangeText={(value) => handleInputChange('tourTaille', value)}
+                        value={profile.tour_taille}
+                        onChangeText={(value) => handleInputChange('tour_taille', value)}
                         keyboardType="decimal-pad"
                         placeholder="ex: 85.00"
                     />
@@ -138,8 +116,8 @@ export default function PantalonProfileForm() {
                     <Text style={styles.label}>Tour de Hanches *</Text>
                     <TextInput
                         style={styles.input}
-                        value={profile.tourHanches}
-                        onChangeText={(value) => handleInputChange('tourHanches', value)}
+                        value={profile.tour_hanches}
+                        onChangeText={(value) => handleInputChange('tour_hanches', value)}
                         keyboardType="decimal-pad"
                         placeholder="ex: 95.00"
                     />
@@ -147,8 +125,8 @@ export default function PantalonProfileForm() {
                     <Text style={styles.label}>Tour de Cuisse</Text>
                     <TextInput
                         style={styles.input}
-                        value={profile.tourCuisse}
-                        onChangeText={(value) => handleInputChange('tourCuisse', value)}
+                        value={profile.tour_cuisse}
+                        onChangeText={(value) => handleInputChange('tour_cuisse', value)}
                         keyboardType="decimal-pad"
                         placeholder="ex: 58.00"
                     />
@@ -156,8 +134,8 @@ export default function PantalonProfileForm() {
                     <Text style={styles.label}>Tour de Genou</Text>
                     <TextInput
                         style={styles.input}
-                        value={profile.tourGenou}
-                        onChangeText={(value) => handleInputChange('tourGenou', value)}
+                        value={profile.tour_genou}
+                        onChangeText={(value) => handleInputChange('tour_genou', value)}
                         keyboardType="decimal-pad"
                         placeholder="ex: 38.00"
                     />
@@ -165,17 +143,17 @@ export default function PantalonProfileForm() {
                     <Text style={styles.label}>Tour de Cheville</Text>
                     <TextInput
                         style={styles.input}
-                        value={profile.tourCheville}
-                        onChangeText={(value) => handleInputChange('tourCheville', value)}
+                        value={profile.tour_cheville}
+                        onChangeText={(value) => handleInputChange('tour_cheville', value)}
                         keyboardType="decimal-pad"
                         placeholder="ex: 18.00"
                     />
 
-                    <Text style={styles.label}>Longueur Entrejambe</Text>
+                    <Text style={styles.label}>Longueur Entre-jambe</Text>
                     <TextInput
                         style={styles.input}
-                        value={profile.longueurEntrejambes}
-                        onChangeText={(value) => handleInputChange('longueurEntrejambes', value)}
+                        value={profile.longueur_entrejambes}
+                        onChangeText={(value) => handleInputChange('longueur_entrejambes', value)}
                         keyboardType="decimal-pad"
                         placeholder="ex: 82.00"
                     />
@@ -183,8 +161,8 @@ export default function PantalonProfileForm() {
                     <Text style={styles.label}>Longueur Totale</Text>
                     <TextInput
                         style={styles.input}
-                        value={profile.longueurTotale}
-                        onChangeText={(value) => handleInputChange('longueurTotale', value)}
+                        value={profile.longueur_totale}
+                        onChangeText={(value) => handleInputChange('longueur_totale', value)}
                         keyboardType="decimal-pad"
                         placeholder="ex: 108.00"
                     />
@@ -196,70 +174,65 @@ export default function PantalonProfileForm() {
 
                     <Text style={styles.label}>Coupe</Text>
                     <View style={styles.buttonGroup}>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.coupe === 'slim' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('coupe', 'slim')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.coupe === 'slim' && styles.optionButtonTextActive]}>
-                                Slim
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.coupe === 'regular' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('coupe', 'regular')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.coupe === 'regular' && styles.optionButtonTextActive]}>
-                                Regular
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.coupe === 'loose' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('coupe', 'loose')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.coupe === 'loose' && styles.optionButtonTextActive]}>
-                                Loose
-                            </Text>
-                        </TouchableOpacity>
+                        {['slim', 'regular', 'loose'].map((c) => (
+                            <TouchableOpacity
+                                key={c}
+                                style={[
+                                    styles.optionButton,
+                                    profile.coupe === c && styles.optionButtonActive
+                                ]}
+                                onPress={() => handleInputChange('coupe', c)}
+                            >
+                                <Text style={[
+                                    styles.optionButtonText,
+                                    profile.coupe === c && styles.optionButtonTextActive
+                                ]}>
+                                    {c.charAt(0).toUpperCase() + c.slice(1)}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
 
                     <Text style={styles.label}>Revers</Text>
                     <View style={styles.buttonGroup}>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.revers === 'oui' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('revers', 'oui')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.revers === 'oui' && styles.optionButtonTextActive]}>
-                                Oui
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.revers === 'non' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('revers', 'non')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.revers === 'non' && styles.optionButtonTextActive]}>
-                                Non
-                            </Text>
-                        </TouchableOpacity>
+                        {['oui', 'non'].map((r) => (
+                            <TouchableOpacity
+                                key={r}
+                                style={[
+                                    styles.optionButton,
+                                    profile.revers === r && styles.optionButtonActive
+                                ]}
+                                onPress={() => handleInputChange('revers', r)}
+                            >
+                                <Text style={[
+                                    styles.optionButtonText,
+                                    profile.revers === r && styles.optionButtonTextActive
+                                ]}>
+                                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
 
                     <Text style={styles.label}>Type de Ceinture</Text>
                     <View style={styles.buttonGroup}>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.typeCeinture === 'classique' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('typeCeinture', 'classique')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.typeCeinture === 'classique' && styles.optionButtonTextActive]}>
-                                Classique
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.optionButton, profile.typeCeinture === 'elastique' && styles.optionButtonActive]}
-                            onPress={() => handleInputChange('typeCeinture', 'elastique')}
-                        >
-                            <Text style={[styles.optionButtonText, profile.typeCeinture === 'elastique' && styles.optionButtonTextActive]}>
-                                Élastique
-                            </Text>
-                        </TouchableOpacity>
+                        {['classique', 'elastique'].map((t) => (
+                            <TouchableOpacity
+                                key={t}
+                                style={[
+                                    styles.optionButton,
+                                    profile.type_ceinture === t && styles.optionButtonActive
+                                ]}
+                                onPress={() => handleInputChange('type_ceinture', t)}
+                            >
+                                <Text style={[
+                                    styles.optionButtonText,
+                                    profile.type_ceinture === t && styles.optionButtonTextActive
+                                ]}>
+                                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
                 </View>
 
