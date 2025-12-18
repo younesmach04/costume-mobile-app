@@ -14,7 +14,7 @@ export const PantalonService = {
     },
 
     async getProfilesByUser(userId) {
-        return apiService.get(`/pantalons/${userId}`, true);
+        return apiService.get(`/pantalons/user/${userId}`, true);
     },
 
     async updateProfile(profileId, profileData) {

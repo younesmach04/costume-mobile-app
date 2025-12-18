@@ -1,138 +1,71 @@
 import { Tabs } from "expo-router";
-import { useColorScheme } from "react-native";
-import { colors } from "../../Constants/Colors";
+import { Platform, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function MainApplicationLayout() {
-    const colorScheme = useColorScheme();
-    const theme = colors[colorScheme];
-
     return (
         <Tabs
             screenOptions={{
-                tabBarStyle: {
-                    backgroundColor: "#d6e5f4",
-                    borderTopWidth: 0,
-                    borderRadius: 20,
-                    position: 'absolute',
-                    bottom: 20,
-                    left: 20,
-                    right: 20,
-                    height: 80,
-                    elevation: 20,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 10 },
-                    shadowOpacity: 0.12,
-                    shadowRadius: 20,
-                    paddingBottom: 10,
-                    paddingLeft: 40,
-                    paddingRight: 40,
-                    marginHorizontal: 50,
-                },
+                tabBarStyle: styles.footer,
                 tabBarActiveTintColor: "#151235",
-                tabBarInactiveTintColor: theme.inactiveColor || '#666666',
+                tabBarInactiveTintColor: "#94a3b8",
+                tabBarShowLabel: true,
                 headerShown: false,
-                animation: "fade"
             }}
         >
+            {/* 1. ONGLET ACCUEIL */}
             <Tabs.Screen
                 name="Main"
                 options={{
-                    title: "Main",
-                    tabBarIcon: ({ focused, color, size }) => (
-                        <Ionicons
-                            name={focused ? "grid" : "grid-outline"}
-                            size={size}
-                            color={color}
-                        />
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="Create"
-                options={{
-                    title: "Create",
-                    tabBarIcon: ({ focused, color, size }) => (
-                        <Ionicons
-                            name="add"
-                            size={32}
-                            color="#ffffff"
-                        />
-                    ),
-                    tabBarItemStyle: {
-                        width: 70,
-                        height: 70,
-                        borderRadius: 35,
-                        backgroundColor: "#335333",
-                        marginTop: -25,
-                        marginHorizontal: 10,
-                        shadowColor: '#2c952c',
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 8,
-                        elevation: 8,
-                        borderWidth: 4,
-                        borderColor: "#d6e5f4",
-                    },
-                }}
-            />
-            <Tabs.Screen
-                name="Profile"
-                options={{
-                    title: "Profile",
-                    tabBarIcon: ({ focused, color, size }) => (
-                        <Ionicons
-                            name={focused ? "person" : "person-outline"}
-                            size={size}
-                            color={color}
-                        />
+                    title: "Accueil",
+                    tabBarIcon: ({ focused, color }) => (
+                        <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
                     ),
                 }}
             />
 
-            {/* Manually hidden screens */}
+            {/* 2. ONGLET PROFILE */}
             <Tabs.Screen
-                name="MyProfiles"
+                name="Profile"
                 options={{
-                    tabBarItemStyle: { display: "none" }
+                    title: "Profil",
+                    tabBarIcon: ({ focused, color }) => (
+                        <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+                    ),
                 }}
             />
-            <Tabs.Screen
-                name="Profiles/Gilet_profile"
-                options={{
-                    tabBarItemStyle: { display: "none" }
-                }}
-            />
-            <Tabs.Screen
-                name="Profiles/Pantalon_profile"
-                options={{
-                    tabBarItemStyle: { display: "none" }
-                }}
-            />
-            <Tabs.Screen
-                name="Profiles/Veste_profile"
-                options={{
-                    tabBarItemStyle: { display: "none" }
-                }}
-            />
-            <Tabs.Screen
-                name="Profiles/Create/CreateGilet"
-                options={{
-                    tabBarItemStyle: { display: "none" }
-                }}
-            />
-            <Tabs.Screen
-                name="Profiles/Create/CreatePantalon"
-                options={{
-                    tabBarItemStyle: { display: "none" }
-                }}
-            />
-            <Tabs.Screen
-                name="Profiles/Create/CreateVeste"
-                options={{
-                    tabBarItemStyle: { display: "none" }
-                }}
-            />
+
+            {/* --- TOUS LES AUTRES DOIVENT ÊTRE À href: null --- */}
+            {/* Ajoutez ici EXACTEMENT le nom du 3ème fichier qui s'affiche */}
+            <Tabs.Screen name="index" options={{ href: null }} />
+            <Tabs.Screen name="Create" options={{ href: null }} />
+            <Tabs.Screen name="MyProfiles" options={{ href: null }} />
+            <Tabs.Screen name="Profiles/Gilet_profile" options={{ href: null }} />
+            <Tabs.Screen name="Profiles/Pantalon_profile" options={{ href: null }} />
+            <Tabs.Screen name="Profiles/Veste_profile" options={{ href: null }} />
+            <Tabs.Screen name="Profiles/Create/CreateGilet" options={{ href: null }} />
+            <Tabs.Screen name="Profiles/Create/CreatePantalon" options={{ href: null }} />
+            <Tabs.Screen name="Profiles/Create/CreateVeste" options={{ href: null }} />
         </Tabs>
     );
 }
+
+const styles = StyleSheet.create({
+    footer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: "#ffffff",
+        borderTopWidth: 1,
+        borderTopColor: "#e2e8f0",
+        height: Platform.OS === 'ios' ? 90 : 70,
+        paddingBottom: Platform.OS === 'ios' ? 30 : 12,
+        paddingTop: 10,
+        elevation: 10, // Ombre Android
+        shadowColor: '#000', // Ombre iOS
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+    }
+});

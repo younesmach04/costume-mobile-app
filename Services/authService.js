@@ -1,10 +1,10 @@
 import { apiService, tokenService } from './api';
-import {decodeJWT} from "../utils/helpers";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-export const authService = {
-    async register(userData) {
-        try {
-            const result = await apiService.post('/register', userData);
+            import {decodeJWT} from "../utils/helpers";
+            import AsyncStorage from "@react-native-async-storage/async-storage";
+            export const authService = {
+                async register(userData) {
+                    try {
+                        const result = await apiService.post('/register', userData);
             console.log(' Inscription réussie:', result.message);
             return result;
 

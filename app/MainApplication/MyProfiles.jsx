@@ -1,80 +1,133 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import { router } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons'; // Inclus par défaut dans Expo
 
 const ProfileNavigationButtons = () => {
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>My profiles</Text>
+        <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="dark-content" />
 
-            <TouchableOpacity
-                style={[styles.button, styles.vesteButton]}
-                onPress={() => router.push('/MainApplication/Profiles/Veste_profile')}
-                activeOpacity={0.7}
-            >
-                <Text style={styles.buttonText}>Veste Profiles</Text>
-            </TouchableOpacity>
+            <View style={styles.header}>
+                <Text style={styles.subtitle}>Gérer vos mesures</Text>
+                <Text style={styles.title}>Mes Profils</Text>
+            </View>
 
-            <TouchableOpacity
-                style={[styles.button, styles.giletButton]}
-                onPress={() => router.push('/MainApplication/Profiles/Gilet_profile')}
-                activeOpacity={0.7}
-            >
-                <Text style={styles.buttonText}>Gilet Profiles</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonGrid}>
+                {/* Bouton Veste */}
+                <TouchableOpacity
+                    style={[styles.card, { borderLeftColor: '#3498db' }]}
+                    onPress={() => router.push('/MainApplication/Profiles/Veste_profile')}
+                    activeOpacity={0.8}
+                >
+                    <View style={[styles.iconContainer, { backgroundColor: '#e1f5fe' }]}>
+                        <MaterialCommunityIcons name="tshirt-crew" size={28} color="#3498db" />
+                    </View>
+                    <View style={styles.textContainer}>
+                        <Text style={styles.cardTitle}>Veste</Text>
+                        <Text style={styles.cardDesc}>Blazers, vestes et manteaux</Text>
+                    </View>
+                    <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                style={[styles.button, styles.pantalonButton]}
-                onPress={() => router.push('/MainApplication/Profiles/Pantalon_profile')}
-                activeOpacity={0.7}
-            >
-                <Text style={styles.buttonText}>Pantalon Profiles</Text>
-            </TouchableOpacity>
-        </View>
+                {/* Bouton Gilet */}
+                <TouchableOpacity
+                    style={[styles.card, { borderLeftColor: '#e74c3c' }]}
+                    onPress={() => router.push('/MainApplication/Profiles/Gilet_profile')}
+                    activeOpacity={0.8}
+                >
+                    <View style={[styles.iconContainer, { backgroundColor: '#fdeaea' }]}>
+                        <MaterialCommunityIcons name="vest" size={28} color="#e74c3c" />
+                    </View>
+                    <View style={styles.textContainer}>
+                        <Text style={styles.cardTitle}>Gilet</Text>
+                        <Text style={styles.cardDesc}>Gilets de costume et sans manches</Text>
+                    </View>
+                    <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+                </TouchableOpacity>
+
+                {/* Bouton Pantalon */}
+                <TouchableOpacity
+                    style={[styles.card, { borderLeftColor: '#2ecc71' }]}
+                    onPress={() => router.push('/MainApplication/Profiles/Pantalon_profile')}
+                    activeOpacity={0.8}
+                >
+                    <View style={[styles.iconContainer, { backgroundColor: '#e8f8f0' }]}>
+                        <MaterialCommunityIcons name="human-male" size={28} color="#2ecc71" />
+                    </View>
+                    <View style={styles.textContainer}>
+                        <Text style={styles.cardTitle}>Pantalon</Text>
+                        <Text style={styles.cardDesc}>Pantalons, jeans et shorts</Text>
+                    </View>
+                    <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+                </TouchableOpacity>
+            </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-        padding: 20,
+        backgroundColor: '#F8F9FA', // Un gris très clair pour faire ressortir le blanc
+    },
+    header: {
+        paddingHorizontal: 25,
+        paddingTop: 40,
+        marginBottom: 30,
+    },
+    subtitle: {
+        fontSize: 14,
+        color: '#888',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        marginBottom: 4,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 30,
-        color: '#333',
+        fontSize: 32,
+        fontWeight: '800',
+        color: '#1A1A1A',
     },
-    button: {
-        width: '100%',
-        maxWidth: 300,
-        paddingVertical: 15,
-        paddingHorizontal: 30,
-        borderRadius: 10,
-        marginVertical: 10,
+    buttonGrid: {
+        paddingHorizontal: 20,
+        gap: 16, // Espace entre les boutons
+    },
+    card: {
+        flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 15,
+        borderLeftWidth: 5, // Petite barre de couleur sur le côté
+        // Ombre iOS
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+        // Ombre Android
+        elevation: 3,
     },
-    vesteButton: {
-        backgroundColor: '#3498db',
+    iconContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
     },
-    giletButton: {
-        backgroundColor: '#e74c3c',
+    textContainer: {
+        flex: 1,
     },
-    pantalonButton: {
-        backgroundColor: '#2ecc71',
-    },
-    buttonText: {
-        color: '#ffffff',
+    cardTitle: {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: '700',
+        color: '#2D3436',
+    },
+    cardDesc: {
+        fontSize: 13,
+        color: '#636E72',
+        marginTop: 2,
     },
 });
 
