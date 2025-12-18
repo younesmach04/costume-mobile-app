@@ -1,44 +1,55 @@
 import { apiService, tokenService } from './api';
-            import {decodeJWT} from "../utils/helpers";
-            import AsyncStorage from "@react-native-async-storage/async-storage";
-            export const authService = {
-                async register(userData) {
-                    try {
-                        const result = await apiService.post('/register', userData);
+import { decodeJWT } from "../utils/helpers";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export const authService = {
+    async register(userData) {
+        try {
+            const result = await apiService.post('/register', userData);
             console.log(' Inscription réussie:', result.message);
             return result;
-
         } catch (error) {
             console.error(' Erreur d\'inscription:', error);
             throw error;
         }
     },
+
     async login(credentials) {
         try {
             const result = await apiService.post('/login', credentials);
             console.log(' Connexion réussie:', result.message);
+
             if (result.data && result.data.access_token) {
+                // 1. Stocker le token
                 await tokenService.setToken(result.data.access_token);
-                const decodedToken = decodeJWT(result.data.access_token)
-                const {email,firstName,lastName,sub,role} = decodedToken
-                await this.setUser({email,firstName,lastName,id:sub,role})
+
+                // 2. Décoder et stocker les infos utilisateur
+                const decodedToken = decodeJWT(result.data.access_token);
+                const { email, firstName, lastName, sub, role } = decodedToken;
+                await this.setUser({ email, firstName, lastName, id: sub, role });
             }
-
             return result;
-
         } catch (error) {
             console.error(' Erreur de connexion:', error);
             throw error;
         }
     },
+
+
     async logout() {
         try {
-            await apiService.post('/logout', {}, true);
+            // On vérifie si on a un token avant d'appeler le serveur
+            const token = await tokenService.getToken();
+            if (token) {
+                await apiService.post('/logout', {}, true);
+                console.log(' Déconnexion réussie côté serveur');
+            }
         } catch (error) {
-            console.log(' Déconnexion serveur échouée, continuation...');
+            console.log(' Déconnexion serveur échouée ou token expiré, continuation...');
         } finally {
+            // Quoi qu'il arrive, on supprime tout localement
             await tokenService.removeToken();
-            console.log(' Déconnexion réussie');
+            await this.removeUser();
         }
     },
 
@@ -47,12 +58,12 @@ import { apiService, tokenService } from './api';
             const result = await apiService.get('/me', true);
             console.log(' Profil récupéré:', result.message);
             return result;
-
         } catch (error) {
             console.error(' Erreur récupération profil:', error);
             throw error;
         }
     },
+
     async refreshToken() {
         try {
             const result = await apiService.post('/refresh', {}, true);
@@ -61,16 +72,16 @@ import { apiService, tokenService } from './api';
             if (result.data && result.data.token) {
                 await tokenService.setToken(result.data.token);
             }
-
             return result;
         } catch (error) {
             console.error(' Erreur rafraîchissement token:', error);
             throw error;
         }
     },
+
     async validateToken() {
         try {
-            const result = await apiService.post('/validate-token', {}, true);
+            const result = await apiService.get('/validate-token', true); // Généralement un GET
             console.log(' Token validé:', result.message);
             return result;
         } catch (error) {
@@ -84,24 +95,22 @@ import { apiService, tokenService } from './api';
             const result = await apiService.put('/profile', userData, true);
             console.log(' Profil mis à jour:', result.message);
             return result;
-
         } catch (error) {
             console.error(' Erreur mise à jour profil:', error);
             throw error;
         }
     },
+
     async changePassword(passwordData) {
         try {
-            const result = await apiService.post('/change-password', passwordData, true);
+            const result = await apiService.put('/change-password', passwordData, true);
             console.log(' Mot de passe changé:', result.message);
             return result;
-
         } catch (error) {
             console.error(' Erreur changement mot de passe:', error);
             throw error;
         }
     },
-
 
     async checkEmail(email) {
         try {
@@ -114,6 +123,8 @@ import { apiService, tokenService } from './api';
         }
     },
 
+    // --- Gestion de l'état local (Storage) ---
+
     async isAuthenticated() {
         return await tokenService.isAuthenticated();
     },
@@ -121,36 +132,36 @@ import { apiService, tokenService } from './api';
     async getCurrentToken() {
         return await tokenService.getToken();
     },
-    async getCurrentUser(){
-      const user = await AsyncStorage.getItem('user')
-      return user ? JSON.parse(user) : null
+
+    async getCurrentUser() {
+        const user = await AsyncStorage.getItem('user');
+        return user ? JSON.parse(user) : null;
     },
 
-    async getCurrentUserId(){
-        const user = await AsyncStorage.getItem('user')
-        return user ? JSON.parse(user).id : 0
+    async getCurrentUserId() {
+        const user = await this.getCurrentUser();
+        return user ? user.id : 0;
     },
 
-
-    async setUser(user){
+    async setUser(user) {
         try {
             await AsyncStorage.setItem('user', JSON.stringify(user));
             console.log(' Utilisateur stocké avec succès');
         } catch (error) {
-            console.error('Erreur d\'enregistrement de l\'utilisateur:', error);
-            throw error;
-        }
-    },
-    async removeUser() {
-        try {
-            await AsyncStorage.removeItem('user');
-            console.log('🔐 Utilisateur supprimé avec succès');
-        } catch (error) {
-            console.error('Erreur de suppression de l\'utilisateur:', error);
+            console.error(' Erreur d\'enregistrement de l\'utilisateur:', error);
             throw error;
         }
     },
 
+    async removeUser() {
+        try {
+            await AsyncStorage.removeItem('user');
+            console.log('🔐 Infos utilisateur supprimées localement');
+        } catch (error) {
+            console.error(' Erreur de suppression de l\'utilisateur:', error);
+            throw error;
+        }
+    },
 };
 
 export default authService;

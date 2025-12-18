@@ -84,9 +84,6 @@ const GiletDetails = () => {
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <MaterialCommunityIcons name="arrow-left" size={26} color="#1e293b" />
-                </TouchableOpacity>
                 <Text style={styles.headerTitle}>Mesures Gilet</Text>
                 <TouchableOpacity
                     onPress={() => router.push({ pathname: '/MainApplication/Profiles/Gilet_form', params: { id: profile.id } })}
@@ -105,8 +102,6 @@ const GiletDetails = () => {
                     <Text style={styles.profileName}>{profile.profileName}</Text>
                     <Text style={styles.lastUpdate}>Profil vérifié</Text>
                 </View>
-
-                {/* Grid des mesures */}
                 <View style={styles.sectionCard}>
                     <Text style={styles.sectionTitle}>Dimensions (cm)</Text>
                     <View style={styles.measureGrid}>
@@ -116,8 +111,6 @@ const GiletDetails = () => {
                         <MeasureCard label="Épaules" value={profile.largeur_epaules} icon="arrow-left-right" />
                     </View>
                 </View>
-
-                {/* Détails du style */}
                 <View style={styles.sectionCard}>
                     <Text style={styles.sectionTitle}>Préférences de style</Text>
 

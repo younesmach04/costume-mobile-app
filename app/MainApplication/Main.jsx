@@ -76,7 +76,7 @@ const Main = () => {
                                 <Text style={styles.categoryEmoji}>👔</Text>
                             </View>
                             <Text style={styles.categoryTitle}>Vestes</Text>
-                            <Text style={styles.categoryCount}>24 modèles</Text>
+                            <Text style={styles.categoryCount}>Voir tout</Text>
                         </TouchableOpacity>
                     </Link>
 
@@ -86,7 +86,7 @@ const Main = () => {
                                 <Text style={styles.categoryEmoji}>👖</Text>
                             </View>
                             <Text style={styles.categoryTitle}>Pantalons</Text>
-                            <Text style={styles.categoryCount}>18 modèles</Text>
+                            <Text style={styles.categoryCount}>Voir tout</Text>
                         </TouchableOpacity>
                     </Link>
 
@@ -96,17 +96,16 @@ const Main = () => {
                                 <Text style={styles.categoryEmoji}>🦺</Text>
                             </View>
                             <Text style={styles.categoryTitle}>Gilets</Text>
-                            <Text style={styles.categoryCount}>12 modèles</Text>
+                            <Text style={styles.categoryCount}>Voir tout</Text>
                         </TouchableOpacity>
                     </Link>
 
-                    <Link href="/MainApplication/Profiles/MyProfiles" asChild>
+                    <Link href="/MainApplication/MyProfiles" asChild>
                         <TouchableOpacity style={styles.categoryCard}>
                             <View style={styles.categoryImageContainer}>
                                 <Text style={styles.categoryEmoji}>👔</Text>
                             </View>
                             <Text style={styles.categoryTitle}>Tous les Profils</Text>
-                            <Text style={styles.categoryCount}>Voir tout</Text>
                         </TouchableOpacity>
                     </Link>
                 </View>
@@ -138,7 +137,7 @@ const Main = () => {
                         </TouchableOpacity>
                     </Link>
 
-                    <Link href="/MainApplication/MyProfiles" asChild>
+                    <Link href="../../../MainApplication/Profiles/MyProfiles" asChild>
                         <TouchableOpacity style={[styles.actionCard, styles.greenCard]}>
                             <Text style={styles.actionIcon}>📋</Text>
                             <Text style={styles.actionText}>Mes Profils</Text>
@@ -146,8 +145,6 @@ const Main = () => {
                     </Link>
                 </View>
             </View>
-
-            {/* Recent activity section */}
             <View style={styles.recentSection}>
                 <Text style={styles.recentTitle}>Activité récente</Text>
 
@@ -382,7 +379,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     actionText: {
-        color: '#fff',
+        color: 'black',
         fontSize: 15,
         fontWeight: '600',
         textAlign: 'center',
