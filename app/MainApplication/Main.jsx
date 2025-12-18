@@ -9,37 +9,11 @@ const { width } = Dimensions.get('window');
 const Main = () => {
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            {/* Header moderne */}
             <View style={styles.header}>
-                {/* Navigation icons */}
-                <View style={styles.topNav}>
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Image
-                            source={require('../../assets/cartsuit.png')}
-                            style={styles.navIcon}
-                        />
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>3</Text>
-                        </View>
-                    </TouchableOpacity>
-
-                    <Link href="/MainApplication/MyProfiles" asChild>
-                        <TouchableOpacity style={styles.iconButton}>
-                            <Image
-                                source={require('../../assets/addprofile.png')}
-                                style={styles.navIcon}
-                            />
-                        </TouchableOpacity>
-                    </Link>
-                </View>
-
-                {/* Welcome section */}
                 <View style={styles.welcomeSection}>
                     <Text style={styles.greeting}>Bienvenue</Text>
                     <Text style={styles.tagline}>Créez votre costume parfait</Text>
                 </View>
-
-                {/* Quick stats cards */}
                 <View style={styles.statsContainer}>
                     <View style={styles.statCard}>
                         <Text style={styles.statNumber}>12</Text>
@@ -137,7 +111,7 @@ const Main = () => {
                         </TouchableOpacity>
                     </Link>
 
-                    <Link href="../../../MainApplication/Profiles/MyProfiles" asChild>
+                    <Link href="../../../MainApplication/MyProfiles" asChild>
                         <TouchableOpacity style={[styles.actionCard, styles.greenCard]}>
                             <Text style={styles.actionIcon}>📋</Text>
                             <Text style={styles.actionText}>Mes Profils</Text>
