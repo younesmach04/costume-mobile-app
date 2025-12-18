@@ -13,27 +13,27 @@ import Spacer from "../../../components/Spacer";
 import Themedtext from "../../../components/Themedtext";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import pantalonService from "../../../Services/PantalonService";
+import costumeService from "../../../Services/CostumeService";
 
-const PantalonProfile = () => {
-    const [pantalons, setPantalons] = useState([]);
+const CostumeProfile = () => {
+    const [costumes, setCostumes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetchPantalons();
+        fetchCostumes();
     }, []);
 
-    const fetchPantalons = async () => {
+    const fetchCostumes = async () => {
         try {
             setLoading(true);
             setError(null);
-            const data = await pantalonService.getAllProfiles();
-            setPantalons(data);
+            const data = await costumeService.getAllCostumes();
+            setCostumes(data);
 
         } catch (err) {
-            console.error('Error fetching pantalons:', err);
-            const message = err?.message || err?.error || 'Impossible de charger les profils';
+            console.error('Error fetching costumes:', err);
+            const message = err?.message || err?.error || 'Impossible de charger les costumes';
             setError(message);
             Alert.alert('Erreur', message);
         } finally {
@@ -42,7 +42,7 @@ const PantalonProfile = () => {
     };
 
     const handleRefresh = () => {
-        fetchPantalons();
+        fetchCostumes();
     };
 
     return (
@@ -50,7 +50,7 @@ const PantalonProfile = () => {
 
             {/* HEADER */}
             <View style={styles.header}>
-                <Themedtext style={styles.headerTitle}>Pantalon Profiles</Themedtext>
+                <Themedtext style={styles.headerTitle}>Mes Costumes</Themedtext>
                 <TouchableOpacity onPress={handleRefresh} disabled={loading}>
                     <Ionicons
                         name="refresh"
@@ -69,14 +69,14 @@ const PantalonProfile = () => {
                     <View style={styles.centerContent}>
                         <ActivityIndicator size="large" color="#335333" />
                         <Spacer height={12} />
-                        <Text style={styles.loadingText}>Loading pants...</Text>
+                        <Text style={styles.loadingText}>Chargement des costumes...</Text>
                     </View>
 
                 ) : error ? (
                     <View style={styles.centerContent}>
                         <Ionicons name="alert-circle-outline" size={64} color="#ff6b6b" />
                         <Spacer height={16} />
-                        <Text style={styles.errorText}>Failed to load pantalons</Text>
+                        <Text style={styles.errorText}>Erreur de chargement</Text>
                         <Spacer height={8} />
                         <Text style={styles.errorSubtext}>{error}</Text>
                         <Spacer height={20} />
@@ -84,45 +84,48 @@ const PantalonProfile = () => {
                             style={styles.retryButton}
                             onPress={handleRefresh}
                         >
-                            <Text style={styles.retryButtonText}>Retry</Text>
+                            <Text style={styles.retryButtonText}>Réessayer</Text>
                         </TouchableOpacity>
                     </View>
 
-                ) : pantalons.length === 0 ? (
+                ) : costumes.length === 0 ? (
                     <View style={styles.centerContent}>
-                        <MaterialCommunityIcons name="fencing" size={64} color="#cccccc" />
+                        <MaterialCommunityIcons name="tshirt-crew-outline" size={64} color="#cccccc" />
                         <Spacer height={16} />
-                        <Themedtext style={styles.emptyText}>No Pantalons Yet</Themedtext>
+                        <Themedtext style={styles.emptyText}>Aucun Costume</Themedtext>
                         <Spacer height={8} />
                         <Text style={styles.emptySubtext}>
-                            Tap the button below to create your first pant profile
+                            Créez votre premier ensemble personnalisé dès maintenant.
                         </Text>
                     </View>
 
                 ) : (
-                    pantalons.map((pant) => (
+                    costumes.map((costume) => (
                         <TouchableOpacity
-                            key={pant.id}
+                            key={costume.id}
                             style={styles.card}
                             activeOpacity={0.7}
                             onPress={() =>
                                 router.push({
-                                    pathname: `/MainApplication/Profiles/PantalonDetails`,
-                                    params: { id: pant.id }
+                                    pathname: `/MainApplication/Profiles/CostumeDetails`,
+                                    params: { id: costume.id }
                                 })
                             }
                         >
                             <View style={styles.cardHeader}>
                                 <View style={styles.iconContainer}>
-                                    <MaterialCommunityIcons name="archive-arrow-down-outline" size={24} color="#335333" />
+                                    {/* Icône de costume complet */}
+                                    <MaterialCommunityIcons name="black-mesa" size={28} color="#335333" />
                                 </View>
 
                                 <View style={styles.info}>
                                     <Text style={styles.name}>
-                                        {pant.profile_name || 'Unnamed Pantalon'}
+                                        {costume.name || 'Costume Sans Nom'}
                                     </Text>
                                     <Text style={styles.description} numberOfLines={2}>
-                                        Coupe : {pant.coupe || 'Classique'} • Taille : {pant.tour_taille} cm
+                                        {costume.veste_profile_id ? "✓ Veste " : ""}
+                                        {costume.pantalon_id ? "✓ Pantalon " : ""}
+                                        {costume.gilet_id ? "✓ Gilet" : ""}
                                     </Text>
                                 </View>
 
@@ -137,12 +140,12 @@ const PantalonProfile = () => {
             <TouchableOpacity
                 style={styles.pillButton}
                 activeOpacity={0.8}
-                onPress={() => router.push('/MainApplication/Profiles/Create/CreatePantalon')}
+                onPress={() => router.push('/MainApplication/Profiles/Create/CreateCostume')}
             >
                 <View style={styles.plusIconContainer}>
                     <Ionicons name="add" size={24} color="#ffffff" />
                 </View>
-                <Text style={styles.pillText}>Create Pant</Text>
+                <Text style={styles.pillText}>Nouveau Costume</Text>
             </TouchableOpacity>
 
         </SafeAreaView>
@@ -166,7 +169,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 16,
-        paddingBottom: 120, // Plus d'espace pour ne pas cacher le dernier item derrière le bouton
+        paddingBottom: 120,
     },
     centerContent: {
         flex: 1,
@@ -208,46 +211,52 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
     },
     card: {
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#f8fafc", // Un gris/bleu très léger pour différencier
         borderRadius: 12,
-        padding: 16,
+        padding: 18,
         marginBottom: 12,
+        borderWidth: 1,
+        borderColor: "#e2e8f0",
     },
     cardHeader: {
         flexDirection: "row",
         alignItems: "center",
     },
     iconContainer: {
-        marginRight: 12,
+        marginRight: 15,
+        backgroundColor: "#edf2ed",
+        padding: 10,
+        borderRadius: 10,
     },
     info: {
         flex: 1,
     },
     name: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: "bold",
         color: "#1e293b",
     },
     description: {
-        fontSize: 14,
+        fontSize: 13,
         color: "#64748b",
         marginTop: 4,
+        fontStyle: 'italic',
     },
     pillButton: {
         position: "absolute",
-        bottom: 100, // Ajusté pour être au dessus de votre footer
+        bottom: 30, // Ajusté selon votre navigation
         right: 20,
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: "#335333",
         paddingHorizontal: 20,
-        paddingVertical: 12,
+        paddingVertical: 14,
         borderRadius: 30,
-        elevation: 8,
+        elevation: 5,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
     plusIconContainer: {
         marginRight: 8,
@@ -259,4 +268,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PantalonProfile;
+export default CostumeProfile;
