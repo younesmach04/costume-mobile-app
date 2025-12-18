@@ -12,6 +12,7 @@ export default function MainApplicationLayout() {
                 headerShown: false,
             }}
         >
+            {/* 1. ONGLET ACCUEIL */}
             <Tabs.Screen
                 name="Main"
                 options={{
