@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const API_BASE_URL = 'http://192.168.1.18:8000/api';
+const API_BASE_URL = 'http://192.168.11.184:8000/api';
 const handleResponse = async (response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({
@@ -39,7 +39,7 @@ export const apiService = {
         }
     },
 
-    async post(endpoint, data, requiresAuth = false) {
+    async post(endpoint, data = {}, requiresAuth = false) {
         try {
             const headers = {
                 'Content-Type': 'application/json',

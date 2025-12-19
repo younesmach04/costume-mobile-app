@@ -20,10 +20,7 @@ export const authService = {
             console.log(' Connexion réussie:', result.message);
 
             if (result.data && result.data.access_token) {
-                // 1. Stocker le token
                 await tokenService.setToken(result.data.access_token);
-
-                // 2. Décoder et stocker les infos utilisateur
                 const decodedToken = decodeJWT(result.data.access_token);
                 const { email, firstName, lastName, sub, role } = decodedToken;
                 await this.setUser({ email, firstName, lastName, id: sub, role });
@@ -81,7 +78,8 @@ export const authService = {
 
     async validateToken() {
         try {
-            const result = await apiService.get('/validate-token', true); // Généralement un GET
+            const result = await apiService.post('/validate-token', {}, true);
+            // ✅ Correct: empty object for data, true for requiresAuth
             console.log(' Token validé:', result.message);
             return result;
         } catch (error) {

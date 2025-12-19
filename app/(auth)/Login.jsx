@@ -7,7 +7,7 @@ import {
     Pressable,
     Alert
 } from 'react-native'
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { colors } from "../../Constants/Colors";
 import Spacer from "../../components/Spacer";
 import ThemedText from "../../components/Themedtext";
@@ -23,6 +23,28 @@ const Login = () => {
         password: ''
     });
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const verifyTokenValidity = async() => {
+            try {
+                const token = await authService.getCurrentToken();
+                if (token) {
+                    const isTokenValid = await authService.validateToken();
+                    console.log('Token valid:', isTokenValid);
+
+                    // If token is valid, maybe redirect to main app?
+                    if (isTokenValid.success) {
+                        router.push("/MainApplication/Main");
+                    }
+                }
+            } catch (error) {
+                console.log('Token validation failed:', error);
+                // Token is invalid or expired, user stays on login page
+            }
+        }
+        verifyTokenValidity()
+
+    },[])
 
     const handleInputChange = (key, value) => {
         setUser(prev => {
