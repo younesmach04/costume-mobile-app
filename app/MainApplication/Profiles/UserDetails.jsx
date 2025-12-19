@@ -30,8 +30,11 @@ const UserDetails = () => {
             setLoading(true);
             const response = await UserService.getCurrentUser();
 
+            // LOG pour déboguer et voir la structure réelle
+            console.log("Données reçues du serveur :", response);
+
             if (response && response.success) {
-                setUser(response.data.user);
+                setUser(response.data);
             } else {
                 setUser(null);
             }

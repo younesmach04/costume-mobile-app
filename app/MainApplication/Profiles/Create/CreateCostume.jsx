@@ -19,13 +19,13 @@ import pantalonService from '../../../../Services/PantalonService';
 import authService from '../../../../Services/authService';
 
 const CreateCostume = () => {
-    // États pour le formulaire
+
     const [costumeName, setCostumeName] = useState('');
     const [selectedVeste, setSelectedVeste] = useState(null);
     const [selectedGilet, setSelectedGilet] = useState(null);
     const [selectedPantalon, setSelectedPantalon] = useState(null);
 
-    // États pour les listes de données
+
     const [data, setData] = useState({ vestes: [], gilets: [], pantalons: [] });
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -39,16 +39,25 @@ const CreateCostume = () => {
             setLoading(true);
             const userId = await authService.getCurrentUserId();
 
-
-            const [v, g, p] = await Promise.all([
+            // Appel simultané des 3 services
+            const [vRes, gRes, pRes] = await Promise.all([
                 vesteService.getProfilesByUser(userId),
                 giletService.getProfilesByUser(userId),
                 pantalonService.getProfilesByUser(userId)
             ]);
 
-            setData({ vestes: v, gilets: g, pantalons: p });
+            /**
+             * CORRECTION : Extraction du champ .data car votre Laravel
+             * renvoie { success: true, data: [...], message: "..." }
+             */
+            setData({
+                vestes: vRes?.data || (Array.isArray(vRes) ? vRes : []),
+                gilets: gRes?.data || (Array.isArray(gRes) ? gRes : []),
+                pantalons: pRes?.data || (Array.isArray(pRes) ? pRes : [])
+            });
+
         } catch (error) {
-            console.error(error);
+            console.error('Erreur chargement profils:', error);
             Alert.alert("Erreur", "Impossible de charger vos profils de mesures.");
         } finally {
             setLoading(false);
@@ -79,9 +88,10 @@ const CreateCostume = () => {
 
             await costumeService.createCostume(payload);
             Alert.alert("Succès", "Votre costume a été créé !", [
-                { text: "OK", onPress: () => router.push('/MainApplication/Profiles/CostumeProfile') }
+                { text: "OK", onPress: () => router.push('/MainApplication/MyProfiles') }
             ]);
         } catch (error) {
+            console.error('Erreur création costume:', error);
             Alert.alert("Erreur", "Une erreur est survenue lors de la création.");
         } finally {
             setSubmitting(false);
@@ -91,7 +101,8 @@ const CreateCostume = () => {
     if (loading) {
         return (
             <View style={styles.centered}>
-                <ActivityIndicator size="large" color="#335333" />
+                <ActivityIndicator size="large" color="#1e3a8a" />
+                <Spacer height={10} />
                 <Text>Chargement de vos profils...</Text>
             </View>
         );
@@ -99,6 +110,7 @@ const CreateCostume = () => {
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* HEADER */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()}>
                     <Ionicons name="close" size={28} color="#1e293b" />
@@ -107,7 +119,7 @@ const CreateCostume = () => {
                 <View style={{ width: 28 }} />
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 {/* NOM DU COSTUME */}
                 <View style={styles.section}>
                     <Text style={styles.label}>Nom du costume</Text>
@@ -149,6 +161,7 @@ const CreateCostume = () => {
                     emptyMessage="Aucun profil de gilet trouvé"
                 />
 
+                {/* BOUTON DE VALIDATION */}
                 <TouchableOpacity
                     style={[styles.submitButton, submitting && styles.disabledButton]}
                     onPress={handleCreate}
@@ -160,21 +173,28 @@ const CreateCostume = () => {
                         <Text style={styles.submitButtonText}>Enregistrer le Costume</Text>
                     )}
                 </TouchableOpacity>
+
+                <Spacer height={40} />
             </ScrollView>
         </SafeAreaView>
     );
 };
 
-// Composant interne pour les sections de sélection
-const SelectorSection = ({ title, icon, items, selectedItem, onSelect, emptyMessage }) => (
+/**
+ * COMPOSANT DE SÉLECTION (INTERNE)
+ * Corrigé avec items=[] par défaut pour éviter items.map error
+ */
+const SelectorSection = ({ title, icon, items = [], selectedItem, onSelect, emptyMessage }) => (
     <View style={styles.section}>
         <View style={styles.sectionHeader}>
-            <MaterialCommunityIcons name={icon} size={20} color="#335333" />
+            <MaterialCommunityIcons name={icon} size={22} color="#1e3a8a" />
             <Text style={styles.sectionTitle}>{title}</Text>
         </View>
 
-        {items.length === 0 ? (
-            <Text style={styles.emptyText}>{emptyMessage}</Text>
+        {!items || items.length === 0 ? (
+            <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>{emptyMessage}</Text>
+            </View>
         ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
                 {items.map((item) => {
@@ -185,12 +205,14 @@ const SelectorSection = ({ title, icon, items, selectedItem, onSelect, emptyMess
                             style={[styles.itemCard, isSelected && styles.selectedCard]}
                             onPress={() => onSelect(isSelected ? null : item)}
                         >
-                            <Text style={[styles.itemName, isSelected && styles.selectedText]}>
-                                {item.profile_name || 'Profil sans nom'}
-                            </Text>
-                            {isSelected && (
-                                <Ionicons name="checkmark-circle" size={20} color="#fff" style={styles.checkIcon} />
-                            )}
+                            <View style={styles.cardContent}>
+                                <Text style={[styles.itemName, isSelected && styles.selectedText]}>
+                                    {item.profile_name || 'Sans nom'}
+                                </Text>
+                                {isSelected && (
+                                    <Ionicons name="checkmark-circle" size={18} color="#fff" />
+                                )}
+                            </View>
                         </TouchableOpacity>
                     );
                 })}
@@ -199,35 +221,45 @@ const SelectorSection = ({ title, icon, items, selectedItem, onSelect, emptyMess
     </View>
 );
 
+const Spacer = ({ height }) => <View style={{ height }} />;
+
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
     centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
-    headerTitle: { fontSize: 18, fontWeight: 'bold' },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9'
+    },
+    headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#1e293b' },
     scrollContent: { padding: 20 },
     section: { marginBottom: 25 },
-    label: { fontSize: 14, fontWeight: 'bold', color: '#64748b', marginBottom: 8, textTransform: 'uppercase' },
-    input: { backgroundColor: '#f1f5f9', padding: 15, borderRadius: 12, fontSize: 16 },
+    label: { fontSize: 13, fontWeight: 'bold', color: '#64748b', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+    input: { backgroundColor: '#f1f5f9', padding: 15, borderRadius: 12, fontSize: 16, borderWidth: 1, borderColor: '#e2e8f0' },
     sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-    sectionTitle: { marginLeft: 8, fontSize: 16, fontWeight: 'bold', color: '#1e293b' },
-    horizontalList: { flexDirection: 'row' },
+    sectionTitle: { marginLeft: 10, fontSize: 16, fontWeight: 'bold', color: '#1e293b' },
+    horizontalList: { flexDirection: 'row', paddingVertical: 5 },
+    emptyContainer: { padding: 10, backgroundColor: '#f8fafc', borderRadius: 10, borderStyle: 'dashed', borderWidth: 1, borderColor: '#cbd5e1' },
     itemCard: {
         backgroundColor: '#f8fafc',
         padding: 15,
         borderRadius: 12,
-        marginRight: 10,
-        minWidth: 140,
+        marginRight: 12,
+        minWidth: 150,
         borderWidth: 1,
         borderColor: '#e2e8f0',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between'
+        elevation: 1,
     },
-    selectedCard: { backgroundColor: '#335333', borderColor: '#335333' },
-    itemName: { color: '#475569', fontWeight: '500' },
+    cardContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    selectedCard: { backgroundColor: '#1e3a8a', borderColor: '#1e3a8a' },
+    itemName: { color: '#334155', fontWeight: '600', fontSize: 14 },
     selectedText: { color: '#fff' },
-    emptyText: { color: '#94a3b8', fontStyle: 'italic', fontSize: 13 },
-    submitButton: { backgroundColor: '#335333', padding: 18, borderRadius: 15, alignItems: 'center', marginTop: 20 },
+    emptyText: { color: '#94a3b8', fontStyle: 'italic', fontSize: 13, textAlign: 'center' },
+    submitButton: { backgroundColor: '#1e3a8a', padding: 18, borderRadius: 15, alignItems: 'center', marginTop: 10, elevation: 3 },
     submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
     disabledButton: { opacity: 0.6 }
 });

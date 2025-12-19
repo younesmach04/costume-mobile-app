@@ -41,7 +41,11 @@ export default function MainApplicationLayout() {
             <Tabs.Screen name="index" options={{ href: null }} />
             <Tabs.Screen name="MyProfiles" options={{ href: null }} />
             <Tabs.Screen name="Profile" options={{ href: null }} />
-
+            <Tabs.Screen name="UserManagement" options={{ href: null }} />
+            <Tabs.Screen name="VesteManagement" options={{ href: null }} />
+            <Tabs.Screen name="PantalonManagement" options={{ href: null }} />
+            <Tabs.Screen name="GiletManagement" options={{ href: null }} />
+            <Tabs.Screen name="CostumeManagement" options={{ href: null }} />
 
             <Tabs.Screen name="Create" options={{ href: null }} />
             <Tabs.Screen name="Profiles/Gilet_profile" options={{ href: null }} />
@@ -62,6 +66,8 @@ export default function MainApplicationLayout() {
             <Tabs.Screen name="Profiles/PantalonDetails" options={{ href: null }} />
             <Tabs.Screen name="Profiles/GiletDetails" options={{ href: null }} />
             <Tabs.Screen name="Profiles/CostumeDetails" options={{ href: null }} />
+
+
 
         </Tabs>
     );

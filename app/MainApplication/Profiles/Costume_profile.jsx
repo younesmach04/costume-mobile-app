@@ -14,6 +14,7 @@ import Themedtext from "../../../components/Themedtext";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import costumeService from "../../../Services/CostumeService";
+import authService from "../../../Services/authService"; // INDISPENSABLE
 
 const CostumeProfile = () => {
     const [costumes, setCostumes] = useState([]);
@@ -28,22 +29,34 @@ const CostumeProfile = () => {
         try {
             setLoading(true);
             setError(null);
-            const data = await costumeService.getAllCostumes();
-            setCostumes(data);
+
+            // 1. Récupérer l'ID de l'utilisateur connecté
+            const user = await authService.getCurrentUser();
+
+            if (!user || !user.id) {
+                throw new Error("Session expirée. Veuillez vous reconnecter.");
+            }
+
+            // 2. Appeler getCostumesByUser au lieu de getAllCostumes
+            const response = await costumeService.getCostumesByUser(user.id);
+
+            // 3. Extraction sécurisée des données (format { success, data } ou tableau direct)
+            const costumesArray = response?.data || (Array.isArray(response) ? response : []);
+
+            setCostumes(costumesArray);
 
         } catch (err) {
             console.error('Error fetching costumes:', err);
-            const message = err?.message || err?.error || 'Impossible de charger les costumes';
+            const message = err?.message || 'Impossible de charger vos costumes';
             setError(message);
+            setCostumes([]); // Évite les erreurs de rendu .map
             Alert.alert('Erreur', message);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleRefresh = () => {
-        fetchCostumes();
-    };
+    const handleRefresh = () => fetchCostumes();
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -55,7 +68,7 @@ const CostumeProfile = () => {
                     <Ionicons
                         name="refresh"
                         size={24}
-                        color={loading ? "#cccccc" : "#335333"}
+                        color={loading ? "#cccccc" : "#1e3a8a"}
                     />
                 </TouchableOpacity>
             </View>
@@ -67,9 +80,9 @@ const CostumeProfile = () => {
             >
                 {loading ? (
                     <View style={styles.centerContent}>
-                        <ActivityIndicator size="large" color="#335333" />
+                        <ActivityIndicator size="large" color="#1e3a8a" />
                         <Spacer height={12} />
-                        <Text style={styles.loadingText}>Chargement des costumes...</Text>
+                        <Text style={styles.loadingText}>Chargement de vos ensembles...</Text>
                     </View>
 
                 ) : error ? (
@@ -95,7 +108,7 @@ const CostumeProfile = () => {
                         <Themedtext style={styles.emptyText}>Aucun Costume</Themedtext>
                         <Spacer height={8} />
                         <Text style={styles.emptySubtext}>
-                            Créez votre premier ensemble personnalisé dès maintenant.
+                            Vous n'avez pas encore composé de costume personnalisé.
                         </Text>
                     </View>
 
@@ -114,8 +127,7 @@ const CostumeProfile = () => {
                         >
                             <View style={styles.cardHeader}>
                                 <View style={styles.iconContainer}>
-                                    {/* Icône de costume complet */}
-                                    <MaterialCommunityIcons name="black-mesa" size={28} color="#335333" />
+                                    <MaterialCommunityIcons name="black-mesa" size={28} color="#1e3a8a" />
                                 </View>
 
                                 <View style={styles.info}>
@@ -145,7 +157,7 @@ const CostumeProfile = () => {
                 <View style={styles.plusIconContainer}>
                     <Ionicons name="add" size={24} color="#ffffff" />
                 </View>
-                <Text style={styles.pillText}>Nouveau Costume</Text>
+                <Text style={styles.pillText}>Composer un Costume</Text>
             </TouchableOpacity>
 
         </SafeAreaView>
@@ -153,119 +165,27 @@ const CostumeProfile = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#ffffff",
-    },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: 16,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-    },
-    scrollContent: {
-        padding: 16,
-        paddingBottom: 120,
-    },
-    centerContent: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 60,
-    },
-    loadingText: {
-        marginTop: 8,
-        color: "#555",
-    },
-    errorText: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "#ff6b6b",
-        textAlign: "center",
-    },
-    errorSubtext: {
-        textAlign: "center",
-        color: "#777",
-    },
-    retryButton: {
-        backgroundColor: "#335333",
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 6,
-    },
-    retryButtonText: {
-        color: "#ffffff",
-        fontWeight: "bold",
-    },
-    emptyText: {
-        fontSize: 18,
-        fontWeight: "600",
-    },
-    emptySubtext: {
-        textAlign: "center",
-        color: "#777",
-        marginHorizontal: 20,
-    },
-    card: {
-        backgroundColor: "#f8fafc", // Un gris/bleu très léger pour différencier
-        borderRadius: 12,
-        padding: 18,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: "#e2e8f0",
-    },
-    cardHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    iconContainer: {
-        marginRight: 15,
-        backgroundColor: "#edf2ed",
-        padding: 10,
-        borderRadius: 10,
-    },
-    info: {
-        flex: 1,
-    },
-    name: {
-        fontSize: 17,
-        fontWeight: "bold",
-        color: "#1e293b",
-    },
-    description: {
-        fontSize: 13,
-        color: "#64748b",
-        marginTop: 4,
-        fontStyle: 'italic',
-    },
-    pillButton: {
-        position: "absolute",
-        bottom: 30, // Ajusté selon votre navigation
-        right: 20,
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#335333",
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        borderRadius: 30,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    plusIconContainer: {
-        marginRight: 8,
-    },
-    pillText: {
-        color: "#ffffff",
-        fontWeight: "bold",
-        fontSize: 16,
-    },
+    container: { flex: 1, backgroundColor: "#ffffff" },
+    header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16 },
+    headerTitle: { fontSize: 22, fontWeight: "bold", color: "#1e293b" },
+    scrollContent: { padding: 16, paddingBottom: 120 },
+    centerContent: { flex: 1, alignItems: "center", justifyContent: "center", marginTop: 60 },
+    loadingText: { marginTop: 8, color: "#555" },
+    errorText: { fontSize: 18, fontWeight: "bold", color: "#ff6b6b", textAlign: "center" },
+    errorSubtext: { textAlign: "center", color: "#777" },
+    retryButton: { backgroundColor: "#1e3a8a", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 6 },
+    retryButtonText: { color: "#ffffff", fontWeight: "bold" },
+    emptyText: { fontSize: 18, fontWeight: "600" },
+    emptySubtext: { textAlign: "center", color: "#777", marginHorizontal: 20 },
+    card: { backgroundColor: "#f8fafc", borderRadius: 15, padding: 18, marginBottom: 12, borderWidth: 1, borderColor: "#e2e8f0", elevation: 2 },
+    cardHeader: { flexDirection: "row", alignItems: "center" },
+    iconContainer: { marginRight: 15, backgroundColor: "#f1f5f9", padding: 10, borderRadius: 12 },
+    info: { flex: 1 },
+    name: { fontSize: 17, fontWeight: "bold", color: "#1e293b" },
+    description: { fontSize: 13, color: "#64748b", marginTop: 4, fontStyle: 'italic' },
+    pillButton: { position: "absolute", bottom: 30, right: 20, flexDirection: "row", alignItems: "center", backgroundColor: "#1e3a8a", paddingHorizontal: 20, paddingVertical: 15, borderRadius: 30, elevation: 8 },
+    plusIconContainer: { marginRight: 8 },
+    pillText: { color: "#ffffff", fontWeight: "bold", fontSize: 16 },
 });
 
 export default CostumeProfile;
